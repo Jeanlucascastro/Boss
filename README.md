@@ -1,2 +1,2 @@
-# boss
+# Boss
  Authenticator system in Kotlin
