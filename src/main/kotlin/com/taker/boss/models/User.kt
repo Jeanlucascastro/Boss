@@ -2,6 +2,7 @@ package com.taker.boss.models
 
 import jakarta.persistence.*
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import javax.swing.text.StyledEditorKit.BoldAction
 
 @Entity
 @Table(name = "tb_user")
@@ -24,6 +25,11 @@ class User {
             val passwordEncoder = BCryptPasswordEncoder()
             field = passwordEncoder.encode(value)
         }
+
+    fun comparePassword(password: String): Boolean {
+        return BCryptPasswordEncoder().matches(password, this.password)
+    }
+
 
     override fun toString(): String {
         return "User(id=$id, name='$name', email='$email')"
