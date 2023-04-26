@@ -1,17 +1,14 @@
 package com.taker.boss.models
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
+import jakarta.persistence.*
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 
 @Entity
+@Table(name = "tb_user")
 class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int = 0
 
     @Column()
@@ -27,4 +24,10 @@ class User {
             val passwordEncoder = BCryptPasswordEncoder()
             field = passwordEncoder.encode(value)
         }
+
+    override fun toString(): String {
+        return "User(id=$id, name='$name', email='$email')"
+    }
+
+
 }
