@@ -11,6 +11,8 @@ import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.core.env.Environment
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.CookieValue
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -20,7 +22,9 @@ import java.util.*
 
 @RestController
 @RequestMapping("boss")
-class AuthController(private val userService: UserService, private val env: Environment) {
+class AuthController(private val userService: UserService) {
+
+    val key = ByteArray(64)
     @PostMapping("register")
     fun hello(@RequestBody body: RegisterDTO): ResponseEntity<User> {
         var user = User()
@@ -34,10 +38,9 @@ class AuthController(private val userService: UserService, private val env: Envi
     @PostMapping("login")
     fun login(@RequestBody body: LoginDTO, response: HttpServletResponse): ResponseEntity<Any> {
 
-        val key = ByteArray(64)
+
         SecureRandom().nextBytes(key)
 
-        val secret = env.getProperty("jwt.secret")
         val user = this.userService.findByEmail(body.email)
             ?: return ResponseEntity.badRequest().body(Message("User not found"))
 
@@ -59,4 +62,34 @@ class AuthController(private val userService: UserService, private val env: Envi
 
         return ResponseEntity.ok(Message("Success"))
     }
+
+    @GetMapping("user")
+    fun user(@CookieValue("jwt") jwt: String?): ResponseEntity<Any>{
+
+        try {
+            if (jwt === null) {
+                return ResponseEntity.status(401).body(Message("Unautenticated"))
+            }
+            val body = Jwts.parser().setSigningKey(key).parseClaimsJws(jwt).body
+
+            return ResponseEntity.ok(this.userService.getById(body.issuer.toInt()))
+        } catch (e: Exception) {
+            return ResponseEntity.status(401).body(Message("Unautenticated"))
+        }
+
+    }
+
+    @PostMapping("logout")
+    fun logout(response: HttpServletResponse): ResponseEntity<Any> {
+    var cookie = Cookie("jwt", "")
+        cookie.maxAge = 0
+
+        response.addCookie(cookie)
+
+        return ResponseEntity.ok(Message("Success"))
+    }
+
+
+
+
 }

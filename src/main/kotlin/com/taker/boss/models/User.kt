@@ -1,8 +1,9 @@
 package com.taker.boss.models
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import javax.swing.text.StyledEditorKit.BoldAction
+
 
 @Entity
 @Table(name = "tb_user")
@@ -20,6 +21,7 @@ class User {
 
     @Column()
     var password = ""
+        @JsonIgnore
         get() = field
         set(value) {
             val passwordEncoder = BCryptPasswordEncoder()
